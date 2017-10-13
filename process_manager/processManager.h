@@ -18,7 +18,24 @@
 extern "C" {
 #endif
 
+typedef struct Processo{
+    int id;
     
+} Processo;    
+    
+typedef struct Tempo;
+typedef struct TabelaPcb;
+typedef struct EstadoPronto;
+typedef struct EstadoBloqueado;
+typedef struct EstadoExecutando;
+
+    
+typedef struct CPU{
+    int contador;
+    int valor;
+} CPU;   
+    
+void criaProcesso(FILE*);
 
 #ifdef __cplusplus
 }

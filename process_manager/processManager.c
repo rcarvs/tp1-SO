@@ -20,8 +20,11 @@ int checaComando(char *comando) {
 
 int main(int argc, char** argv) {
     //o process manager deve ficar ouvindo o commander e efetuar as ações caso receba o comando
-    char *comando = (char*) malloc(sizeof (char));
-    int retorno = 1;
+    char *comando = (char*) malloc(sizeof (char));    
+    
+    //abrir o primeiro processo que vai controlar toda a execução    
+    criaProcesso(fopen("processo1.txt","r"));
+    
     while (1) {
 
         fscanf(stdin, "%c", comando);
@@ -69,7 +72,10 @@ int main(int argc, char** argv) {
 }
 
 
-void criaProcesso();
+void criaProcesso(FILE *arquivo){
+    //criar o processo irá colocar o processo em um vetor de processos que estão prontos para executar
+    
+}
 void substituiProcesso();
 void alteraEstadoProcesso();
 void escalonaProcessos();

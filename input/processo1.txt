@@ -1,0 +1,11 @@
+S 1
+A 100
+D 50
+A 30
+B
+F 1
+R processo2.txt
+B
+F 1
+R processo3.txt
+E
