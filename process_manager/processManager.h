@@ -18,24 +18,51 @@
 extern "C" {
 #endif
 
+#define PRONTO 0
+#define EXECUTANDO 1
+#define BLOQUEADO 2
+#define ERR -1
+
 typedef struct Processo{
     int id;
-    
+    int ppid;
+    int PC;
+    int estado;
+    int var;
+    int prioridade;
+    char *programa;
 } Processo;    
     
 typedef struct Tempo;
-typedef struct TabelaPcb;
-typedef struct EstadoPronto;
-typedef struct EstadoBloqueado;
-typedef struct EstadoExecutando;
+typedef struct TabelaPcb{
+	Processo *processos;
+	int num;
+} TabelaPcb;
+
+typedef struct EstadoPronto{
+	int *ids;
+	int num;
+} EstadoPronto;
+
+typedef struct EstadoBloqueado{
+	int *ids;
+	int num;
+} EstadoBloqueado;
+
+typedef struct EstadoExecutando{
+	int *ids;
+	int num;
+} EstadoExecutando;
 
     
 typedef struct CPU{
     int contador;
     int valor;
-} CPU;   
-    
-void criaProcesso(FILE*);
+} CPU;
+
+char *getPrograma(FILE *);
+char *clonaPrograma(char *);
+int criaProcesso(char *, int, TabelaPcb *, EstadoPronto *, int);
 
 #ifdef __cplusplus
 }
