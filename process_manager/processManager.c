@@ -191,6 +191,8 @@ void executa(TabelaPcb *tabelaPcb, EstadoExecutando *estadoExecutando,EstadoBloq
             break;
         case 'E':
             //termina processo simulado
+            
+            
             printf("Reconheceu um E");
             break;
         case 'F':
