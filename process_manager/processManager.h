@@ -21,7 +21,15 @@ extern "C" {
 #define PRONTO 0
 #define EXECUTANDO 1
 #define BLOQUEADO 2
-#define ERR -1
+#define ERR -1    
+
+/*
+ * Struct para guardar informações do processo referentes à suas execuções
+ */
+typedef struct ProcessoCPUInfos{    
+    int quantuns_totais; 
+    int quantuns_parciais;
+} ProcessoCPUInfos;    
 
 typedef struct Processo{
     int id;
@@ -31,6 +39,7 @@ typedef struct Processo{
     int var;
     int prioridade;
     char *programa;
+    ProcessoCPUInfos CPUInfos;
 } Processo;    
     
 typedef struct Tempo;
@@ -50,11 +59,10 @@ typedef struct EstadoBloqueado{
 } EstadoBloqueado;
 
 typedef struct EstadoExecutando{
-	int *ids;
+	int *ids;        
 	int num;
 } EstadoExecutando;
 
-    
 typedef struct CPU{
     int contador;
     int valor;
@@ -62,7 +70,20 @@ typedef struct CPU{
 
 char *getPrograma(FILE *);
 char *clonaPrograma(char *);
+
+void executa(TabelaPcb *tabelaPcb,EstadoExecutando *estadoExecutando);
+/*
+ * Função responsável por criar um novo processo e colocalo na tabela pcb
+ * Parametros:
+ * 0 -> Instruções do novo processo
+ * 1 -> offset de instruções do novo processo
+ * 2 -> tabela pcb para inserir o processo
+ * 3 -> tabela de processos prontos
+ * 4 -> id do processo pai na tabela pcb
+ */
 int criaProcesso(char *, int, TabelaPcb *, EstadoPronto *, int);
+
+void escalonaProcessos(TabelaPcb*,EstadoPronto*,EstadoBloqueado*,EstadoExecutando*);
 
 #ifdef __cplusplus
 }
