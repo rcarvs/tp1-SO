@@ -190,13 +190,22 @@ void executa(TabelaPcb *tabelaPcb, EstadoExecutando *estadoExecutando,EstadoBloq
             printf("Reconheceu um B");
             break;
         case 'E':
-            //termina processo simulado
-            
-            
+            //termina processo simulado            
+            //REMOVER ELE DA LISTA DE EXECUTANDO E DA TABELA PCB
+            for(int i=estadoExecutando->ids[0];i<(tabelaPcb->num-1);i++){
+                tabelaPcb->processos[i] = tabelaPcb->processos[i+1];
+            }
+            tabelaPcb->num--;
+            realloc(tabelaPcb->processos,sizeof(int)*tabelaPcb->num);
+            estadoExecutando->ids[0] = NULL;
+            estadoExecutando->num--;
             printf("Reconheceu um E");
             break;
         case 'F':
             //cria um novo processo simulado que executa no PC+1 e espera um n que é um offset do pai
+            
+            
+            
             printf("Reconheceu um F");
             break;
         case 'R':
