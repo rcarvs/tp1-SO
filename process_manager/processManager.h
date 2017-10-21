@@ -22,7 +22,9 @@ extern "C" {
 #define EXECUTANDO 1
 #define BLOQUEADO 2
 #define ERR -1    
-
+#define ESCAL_RR -3
+#define ESCAL_LOTERIA -2
+	
 /*
  * Struct para guardar informações do processo referentes à suas execuções
  */
@@ -71,7 +73,7 @@ typedef struct CPU{
 char *getPrograma(FILE *);
 char *clonaPrograma(char *);
 
-void executa(TabelaPcb *tabelaPcb,EstadoExecutando *estadoExecutando);
+void executa(TabelaPcb *, EstadoExecutando *, EstadoBloqueado *);
 /*
  * Função responsável por criar um novo processo e colocalo na tabela pcb
  * Parametros:
@@ -83,7 +85,7 @@ void executa(TabelaPcb *tabelaPcb,EstadoExecutando *estadoExecutando);
  */
 int criaProcesso(char *, int, TabelaPcb *, EstadoPronto *, int);
 
-void escalonaProcessos(TabelaPcb*,EstadoPronto*,EstadoBloqueado*,EstadoExecutando*);
+void escalonaProcessos(TabelaPcb *, EstadoPronto *, EstadoBloqueado *, EstadoExecutando *);
 
 #ifdef __cplusplus
 }

@@ -23,6 +23,13 @@ int quantum = 3;
  */
 CPU cpu;
 
+
+/*
+ * A variável escalonador define qual o escalonador a ser utilizado na execução do programa
+ */
+int escalonador;
+
+
 int checaComando(char *comando) {
     char alfabeto[] = {'Q', 'U', 'P', 'T'};
 
@@ -65,8 +72,10 @@ int main(int argc, char** argv) {
     EstadoBloqueado estadoBloqueado;
     estadoBloqueado.num = 0;
 
-
-
+    /*Definindo o escalonador a ser utilizado
+     *Macros: ESCAL_RR, ESCAL_LOTERIA
+     */
+    escalonador = ESCAL_RR;
 
     //abrir o primeiro processo que vai controlar toda a execução
     if (criaProcesso(getPrograma(fopen(argv[1], "r")), 0, &tabelaPcb, &estadoPronto, 0) == ERR) {
@@ -101,11 +110,11 @@ int main(int argc, char** argv) {
                         estadoPronto.ids[0] = 0;
                         estadoPronto.num--;
                         for(int i=0;i<estadoPronto.num;i++){
-                            estadoPronto[i] = estadoPronto[i+1];
+                            estadoPronto.ids[i] = estadoPronto.ids[i+1];
                         }
                     }
                     escalonaProcessos(&tabelaPcb, &estadoPronto, &estadoBloqueado, &estadoExecutando);
-                    executa(&tabelaPcb, &estadoExecutando);
+                    executa(&tabelaPcb, &estadoExecutando, &estadoBloqueado);
                     break;
                 case 'U':
                     //Desbloqueie o primeiro processo simulado que está na fila de bloqueados.
@@ -208,29 +217,43 @@ void executa(TabelaPcb *tabelaPcb, EstadoExecutando *estadoExecutando,EstadoBloq
 }
 
 void escalonaProcessos(TabelaPcb *tabelaPcb, EstadoPronto *estadoPronto, EstadoBloqueado *estadoBloqueado, EstadoExecutando *estadoExecutando) {
-    //FCFS
+    //round-robin
     Processo *executando = &tabelaPcb->processos[estadoExecutando->ids[0]];
-    int substitui = 0;
+    int sorteado, idTabelaPcBExecutando;
 
-    //estourou o limite de quantuns do processo?
-    if (executando->CPUInfos.quantuns_parciais == quantum) {
-        executando->CPUInfos->quantuns_parciais = 0;
-        //esse processo deve ser substituido e outro processo escalonado no lugar dele
-        //mas antes vou verificar a existencia de outro processo pra substitui-lo
-        if (estadoPronto != 0) {
-            //substitui o processo
-            executando->estado = PRONTO;
-            int idTabelaPcBExecutando = estadoExecutando->ids[0];
-            estadoExecutando->ids[0] = estadoPronto->ids[0];
+    switch(escalonador) {
+        case ESCAL_RR:
+            //estourou o limite de quantuns do processo?
+            if (executando->CPUInfos.quantuns_parciais == quantum) {
+                executando->CPUInfos.quantuns_parciais = 0;
+                //esse processo deve ser substituido e outro processo escalonado no lugar dele
+                //mas antes vou verificar a existencia de outro processo pra substitui-lo
+                if (estadoPronto != 0) {
+                    //substitui o processo
+                    executando->estado = PRONTO;
+                    idTabelaPcBExecutando = estadoExecutando->ids[0];
+                    estadoExecutando->ids[0] = estadoPronto->ids[0];
+                    for (int i = 0; i < (estadoPronto->num - 1); i++) {
+                        estadoPronto->ids[i] = estadoPronto->ids[i + 1];
+                    }
+                    estadoPronto->ids[estadoPronto->num - 1] = idTabelaPcBExecutando;
+                }
+
+
+            }
+        break;
+
+        case ESCAL_LOTERIA:
+            sorteado = rand() % (estadoPronto->num - 1);
+            idTabelaPcBExecutando = estadoExecutando->ids[0];
+            estadoExecutando->ids[0] = estadoPronto->ids[sorteado];
             for (int i = 0; i < (estadoPronto->num - 1); i++) {
-                estadoPronto[i] = estadoPronto[i + 1];
+                estadoPronto->ids[i] = estadoPronto->ids[i + 1];
             }
             estadoPronto->ids[estadoPronto->num - 1] = idTabelaPcBExecutando;
-        }
+        break;
 
     }
-
-
 }
 
 
