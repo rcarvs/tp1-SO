@@ -205,7 +205,7 @@ void executa(TabelaPcb *tabelaPcb, EstadoExecutando *estadoExecutando, EstadoPro
     char instrucao, *file, *path = "../input/";
     int soma = 0, n;
     instrucao = executante->programa[executante->PC];
-    printf("3 - Contador de programa: %d\n",executante->PC);
+    printf("3 - Contador de programa: %c\n",executante->programa[executante->PC]);
     switch (instrucao) {
         case 'S':
             //atualiza valor da variavel do processo
