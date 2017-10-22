@@ -128,7 +128,7 @@ int main(int argc, char** argv) {
                     print = 1;
                     //fim de uma unidade de tempo. Reescalona processos e executa
                     //vou ter sempre somente 1 processo em execução
-                    if (estadoExecutando.num == 0) {
+                    if (estadoExecutando.num == 0 && estadoPronto.num > 0) {
                         estadoExecutando.ids = malloc(sizeof (int));
                         estadoExecutando.ids[0] = estadoPronto.ids[0];
                         estadoExecutando.num++;
@@ -141,12 +141,34 @@ int main(int argc, char** argv) {
                             estadoPronto.ids[i] = estadoPronto.ids[i+1];
                         }
                     }
-                    escalonaProcessos(&tabelaPcb, &estadoPronto, &estadoBloqueado, &estadoExecutando);
-                    executa(&tabelaPcb, &estadoExecutando, &estadoPronto, &estadoBloqueado);
+                    
+                    if(estadoExecutando.num > 0){
+                        //só faço isso se consegui colocar um processo aqui, senao ta tudo bloqueado e nao tem pq fazer isso
+                        escalonaProcessos(&tabelaPcb, &estadoPronto, &estadoBloqueado, &estadoExecutando);
+                        executa(&tabelaPcb, &estadoExecutando, &estadoPronto, &estadoBloqueado);
+                    }
+                    
+                    
                     break;
                 case 'U':
                     print = 1;
                     //Desbloqueie o primeiro processo simulado que está na fila de bloqueados.
+                    if(estadoBloqueado.num > 0){
+                        //tem algum processo bloqueado para ser desbloqueado
+                        tabelaPcb.processos[estadoBloqueado.ids[0]].estado = PRONTO;
+                        estadoBloqueado.num--;                        
+                        estadoPronto.num++;
+                        realloc(estadoPronto.ids,estadoPronto.num*sizeof(int));
+                        estadoPronto.ids[estadoPronto.num-1] = estadoBloqueado.ids[0];
+                        estadoBloqueado.ids[0] = 0;
+                        for(int i=0;i<estadoBloqueado.num-1;i++){
+                            estadoBloqueado.ids[i] = estadoBloqueado.ids[i-1];
+                        }
+                        if(estadoBloqueado.num > 0){
+                            realloc(estadoBloqueado.ids,sizeof(int)*estadoBloqueado.num);
+                        }
+                        tabelaPcb.processos[estadoBloqueado.ids[0]].estado = PRONTO;                       
+                    }
                     break;
                 case 'P':
                     print = 1;
@@ -167,9 +189,9 @@ int main(int argc, char** argv) {
             if(print) {
                 //system("clear");
                 printTabela(&tabelaPcb, estadoExecutando.ids, estadoExecutando.num, "EXECUTANDO");
-                printf("\n\n");
+                printf("\n");
                 printTabela(&tabelaPcb, estadoPronto.ids, estadoPronto.num, "PRONTO");
-                printf("\n\n");
+                printf("\n");
                 printTabela(&tabelaPcb, estadoBloqueado.ids, estadoBloqueado.num, "BLOQUEADO");
                 printf("\n\n ---------------- \n\n");
             }
@@ -198,8 +220,10 @@ void executa(TabelaPcb *tabelaPcb, EstadoExecutando *estadoExecutando, EstadoPro
             executante->CPUInfos.quantuns_parciais++;
             executante->CPUInfos.quantuns_totais++;
             sscanf(&executante->programa[executante->PC], "S %d", &executante->var);
-            executante->PC = executante->PC += 4; //Saltado 4 caracteres da instrução para PC ficar parado na próxima
-            printf("\n### Reconheceu um S ###\n");
+            for(; (executante->programa[executante->PC] != '\n') && (executante->programa[executante->PC] != '\0') ? 1 : (executante->PC++ * 0) ; executante->PC++);
+            if(debug){
+                printf("\n### Reconheceu um S ###\n");
+            }            
             break;
         case 'A':
             //incrementa n na variavel do processo
@@ -209,7 +233,10 @@ void executa(TabelaPcb *tabelaPcb, EstadoExecutando *estadoExecutando, EstadoPro
             executante->var += soma;
             //Avança pc para a próxima instrução
             for(; (executante->programa[executante->PC] != '\n') && (executante->programa[executante->PC] != '\0') ? 1 : (executante->PC++ * 0) ; executante->PC++);
-            printf("\n### Reconheceu um A ###\n");
+            if(debug){
+                printf("\n### Reconheceu um A ###\n");
+            }
+            
             break;
         case 'D':
             executante->CPUInfos.quantuns_parciais++;
@@ -221,13 +248,14 @@ void executa(TabelaPcb *tabelaPcb, EstadoExecutando *estadoExecutando, EstadoPro
             //subtrai n da variavel
 
             //fazer a mesma coisa do S mas subtraindo
-            printf("\n### Reconheceu um D ###\n");
+            if(debug){
+                printf("\n### Reconheceu um D ###\n");
+            }
 
 
             break;
         case 'B':
             //bloqueia processo
-
             //retiro ele da lista de executando e coloco ele na lista de bloqueados
             estadoBloqueado->num++;
             if((estadoBloqueado->num - 1) == 0) {
@@ -242,8 +270,10 @@ void executa(TabelaPcb *tabelaPcb, EstadoExecutando *estadoExecutando, EstadoPro
             estadoExecutando->ids = realloc(estadoExecutando->ids, estadoExecutando->num * sizeof(int));
             executante->estado = BLOQUEADO;
             for(; (executante->programa[executante->PC] != '\n') && (executante->programa[executante->PC] != '\0') ? 1 : (executante->PC++ * 0) ; executante->PC++);
-
-            printf("\n### Reconheceu um B ###\n");
+            if(debug){
+                printf("\n### Reconheceu um B ###\n");
+            }                
+            
             break;
         case 'E':
             //termina processo simulado            
@@ -255,13 +285,14 @@ void executa(TabelaPcb *tabelaPcb, EstadoExecutando *estadoExecutando, EstadoPro
             realloc(tabelaPcb->processos,sizeof(int)*tabelaPcb->num);
             estadoExecutando->ids[0] = NULL;
             estadoExecutando->num--;
-            printf("Reconheceu um E");
-
+            if(debug){
+                printf("\n### Reconheceu um E ###\n");
+            }            
             //Resta remover da tabelaPcb
             //termina processo simulado
 
 
-            printf("\n### Reconheceu um E ###\n");
+            
 
             break;
         case 'F':
@@ -277,10 +308,13 @@ void executa(TabelaPcb *tabelaPcb, EstadoExecutando *estadoExecutando, EstadoPro
                 for(; (executante->programa[executante->PC] != '\n') && (executante->programa[executante->PC] != '\0') ? 1 : (executante->PC++ * 0) ; executante->PC++);
             //PROBLEMA NO AVANÇO PARA A PRÓXIMA INSTRUÇÃO DO PC ---------------##########################
             //cria um novo processo simulado que executa no PC+1 e espera um n que é um offset do pai
-            printf("\n### Reconheceu um F ###\n");
+                if(debug){
+                    printf("\n### Reconheceu um F ###\n");
+                }
+            
             break;
         case 'R':
-            //sscanf(&executante->programa[executante->PC], "R %s", file);
+            sscanf(&executante->programa[executante->PC], "R %s", file);
             printf("ARQUIVO = %s\n", file);
             //substitui o programa do processo simulado e começa no pc 0
             printf("\n### Reconheceu um R ###\n");
@@ -301,8 +335,9 @@ void escalonaProcessos(TabelaPcb *tabelaPcb, EstadoPronto *estadoPronto, EstadoB
                 executando->CPUInfos.quantuns_parciais = 0;
                 //esse processo deve ser substituido e outro processo escalonado no lugar dele
                 //mas antes vou verificar a existencia de outro processo pra substitui-lo
-                if (estadoPronto != 0) {
-                    //substitui o processo
+                printf("Vai verificar estadoPronto com %d",estadoPronto->num);
+                if (estadoPronto->num != 0) {
+                    //substitui o processo                    
                     executando->estado = PRONTO;
                     idTabelaPcBExecutando = estadoExecutando->ids[0];
                     estadoExecutando->ids[0] = estadoPronto->ids[0];
