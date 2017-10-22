@@ -150,14 +150,14 @@ int main(int argc, char** argv) {
                         tabelaPcb.processos[estadoBloqueado.ids[0]].estado = PRONTO;
                         estadoBloqueado.num--;
                         estadoPronto.num++;
-                        realloc(estadoPronto.ids, estadoPronto.num * sizeof (int));
+                        estadoPronto.ids = realloc(estadoPronto.ids, estadoPronto.num * sizeof (int));
                         estadoPronto.ids[estadoPronto.num - 1] = estadoBloqueado.ids[0];
                         estadoBloqueado.ids[0] = 0;
                         for (int i = 0; i < estadoBloqueado.num - 1; i++) {
                             estadoBloqueado.ids[i] = estadoBloqueado.ids[i - 1];
                         }
                         if (estadoBloqueado.num > 0) {
-                            realloc(estadoBloqueado.ids, sizeof (int)*estadoBloqueado.num);
+                            estadoBloqueado.ids = realloc(estadoBloqueado.ids, sizeof (int)*estadoBloqueado.num);
                         }
                         tabelaPcb.processos[estadoBloqueado.ids[0]].estado = PRONTO;
                     }
@@ -202,7 +202,7 @@ int main(int argc, char** argv) {
 
 void executa(TabelaPcb *tabelaPcb, EstadoExecutando *estadoExecutando, EstadoPronto *estadoPronto, EstadoBloqueado *estadoBloqueado) {
     Processo *executante = &tabelaPcb->processos[estadoExecutando->ids[0]];
-    char instrucao, *file;
+    char instrucao, *file, *path = "../input/";
     int soma = 0, n;
     instrucao = executante->programa[executante->PC];
     printf("3 - Contador de programa: %d\n",executante->PC);
@@ -266,13 +266,13 @@ void executa(TabelaPcb *tabelaPcb, EstadoExecutando *estadoExecutando, EstadoPro
 
             break;
         case 'E':
-            //termina processo simulado            
+            //termina processo simulado
             //REMOVER ELE DA LISTA DE EXECUTANDO E DA TABELA PCB
             for (int i = estadoExecutando->ids[0]; i < (tabelaPcb->num - 1); i++) {
                 tabelaPcb->processos[i] = tabelaPcb->processos[i + 1];
             }
             tabelaPcb->num--;
-            realloc(tabelaPcb->processos, sizeof (int)*tabelaPcb->num);
+            tabelaPcb->processos = realloc(tabelaPcb->processos, sizeof (int)*tabelaPcb->num);
             estadoExecutando->ids[0] = NULL;
             estadoExecutando->num--;
 
@@ -314,8 +314,12 @@ void executa(TabelaPcb *tabelaPcb, EstadoExecutando *estadoExecutando, EstadoPro
             break;
         case 'R':
             sscanf(&executante->programa[executante->PC], "R %s", file);
-            printf("ARQUIVO = %s\n", file);
-
+            path = realloc(path, (strlen(file) + strlen("../input/")) * sizeof(char));
+            strcat(path, file);
+            executante->programa = getPrograma(fopen(path, "r"));
+            executante->PC = 0;
+            free(path);
+            free(file);
             printf("\n### Reconheceu um R ###\n");
             break;
     }
@@ -338,7 +342,7 @@ void escalonaProcessos(TabelaPcb *tabelaPcb, EstadoPronto *estadoPronto, EstadoB
                 //mas antes vou verificar a existencia de outro processo pra substitui-lo
                 printf("Vai verificar estadoPronto com %d", estadoPronto->num);
                 if (estadoPronto->num != 0) {
-                    //substitui o processo                    
+                    //substitui o processo
                     executando->estado = PRONTO;
                     idTabelaPcBExecutando = estadoExecutando->ids[0];
                     estadoExecutando->ids[0] = estadoPronto->ids[0];
