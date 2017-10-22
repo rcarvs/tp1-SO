@@ -49,6 +49,8 @@ void printProcesso(Processo *p, int programa) {
     printf("    Contador de Programa: %d\n", p->PC);
     printf("    Valor: %d\n", p->var);
     printf("    PPID: %d\n", p->ppid);
+    printf("    Quatuns Parciais: %d\n", p->CPUInfos.quantuns_parciais);
+    printf("    Quatuns Totais: %d\n", p->CPUInfos.quantuns_totais);
     if (programa) {
         printf("    Programa:\n       ");
         for(int i = 0 ; p->programa[i] != '\0'; i++){
@@ -217,8 +219,7 @@ void executa(TabelaPcb *tabelaPcb, EstadoExecutando *estadoExecutando, EstadoPro
         case 'S':
             //atualiza valor da variavel do processo
             //atualizar valores dos processos
-            executante->CPUInfos.quantuns_parciais++;
-            executante->CPUInfos.quantuns_totais++;
+
             sscanf(&executante->programa[executante->PC], "S %d", &executante->var);
             for(; (executante->programa[executante->PC] != '\n') && (executante->programa[executante->PC] != '\0') ? 1 : (executante->PC++ * 0) ; executante->PC++);
             if(debug){
@@ -227,8 +228,7 @@ void executa(TabelaPcb *tabelaPcb, EstadoExecutando *estadoExecutando, EstadoPro
             break;
         case 'A':
             //incrementa n na variavel do processo
-            executante->CPUInfos.quantuns_parciais++;
-            executante->CPUInfos.quantuns_totais++;
+            
             sscanf(&executante->programa[executante->PC], "A %d", &soma);
             executante->var += soma;
             //Avança pc para a próxima instrução
@@ -239,8 +239,7 @@ void executa(TabelaPcb *tabelaPcb, EstadoExecutando *estadoExecutando, EstadoPro
             
             break;
         case 'D':
-            executante->CPUInfos.quantuns_parciais++;
-            executante->CPUInfos.quantuns_totais++;
+            
             sscanf(&executante->programa[executante->PC], "D %d", &soma);
             executante->var -= soma;
             //Avança pc para a próxima instrução
@@ -326,6 +325,8 @@ void executa(TabelaPcb *tabelaPcb, EstadoExecutando *estadoExecutando, EstadoPro
 void escalonaProcessos(TabelaPcb *tabelaPcb, EstadoPronto *estadoPronto, EstadoBloqueado *estadoBloqueado, EstadoExecutando *estadoExecutando) {
     //round-robin
     Processo *executando = &tabelaPcb->processos[estadoExecutando->ids[0]];
+    executando->CPUInfos.quantuns_parciais++;
+    executando->CPUInfos.quantuns_totais++;
     int sorteado, idTabelaPcBExecutando;
 
     switch(escalonador) {
