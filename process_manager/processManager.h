@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-/* 
+/*
  * File:   processManager.h
  * Author: rcarvs
  *
@@ -21,15 +21,17 @@ extern "C" {
 #define PRONTO 0
 #define EXECUTANDO 1
 #define BLOQUEADO 2
-#define ERR -1    
+#define ERR -1
+#define ESCAL_RR -3
+#define ESCAL_LOTERIA -2
 
 /*
  * Struct para guardar informações do processo referentes à suas execuções
  */
-typedef struct ProcessoCPUInfos{    
-    int quantuns_totais; 
+typedef struct ProcessoCPUInfos{
+    int quantuns_totais;
     int quantuns_parciais;
-} ProcessoCPUInfos;    
+} ProcessoCPUInfos;
 
 typedef struct Processo{
     int id;
@@ -40,8 +42,8 @@ typedef struct Processo{
     int prioridade;
     char *programa;
     ProcessoCPUInfos CPUInfos;
-} Processo;    
-    
+} Processo;
+
 typedef struct Tempo;
 typedef struct TabelaPcb{
 	Processo *processos;
@@ -59,7 +61,7 @@ typedef struct EstadoBloqueado{
 } EstadoBloqueado;
 
 typedef struct EstadoExecutando{
-	int *ids;        
+	int *ids;
 	int num;
 } EstadoExecutando;
 
@@ -70,8 +72,8 @@ typedef struct CPU{
 
 char *getPrograma(FILE *);
 char *clonaPrograma(char *);
-
-void executa(TabelaPcb *tabelaPcb,EstadoExecutando *estadoExecutando);
+int getValorCharzado(Processo *);
+void executa(TabelaPcb *, EstadoExecutando *, EstadoPronto *, EstadoBloqueado *);
 /*
  * Função responsável por criar um novo processo e colocalo na tabela pcb
  * Parametros:
@@ -83,11 +85,10 @@ void executa(TabelaPcb *tabelaPcb,EstadoExecutando *estadoExecutando);
  */
 int criaProcesso(char *, int, TabelaPcb *, EstadoPronto *, int);
 
-void escalonaProcessos(TabelaPcb*,EstadoPronto*,EstadoBloqueado*,EstadoExecutando*);
+void escalonaProcessos(TabelaPcb *, EstadoPronto *, EstadoBloqueado *, EstadoExecutando *);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* PROCESSMANAGER_H */
-
