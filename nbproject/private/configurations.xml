@@ -19,6 +19,8 @@
         <in>processManager.h</in>
       </df>
       <df name="reporter">
+        <in>reporter.c</in>
+        <in>reporter.h</in>
       </df>
     </df>
   </logicalFolder>

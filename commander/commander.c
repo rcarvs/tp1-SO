@@ -35,6 +35,12 @@ int criaProcesso() {
 void comandar(int *fd, FILE *entrada) {
     //essa função será responsável por passar os comandos do commander para o process manager    
     //ler 1 comando por segundo    
+    
+    
+    //o primeiro passo aqui vai ser enviar o stdout para o proccess manager para que ele consiga imprimir as coisas na saída padrão
+    write(fd[1],&stdout  ,sizeof(int));
+
+    
     char *comando = (char*) malloc(sizeof (char)*2);
     int retorno;
     while ((*comando = fgetc(entrada)) != EOF) {
@@ -66,7 +72,7 @@ void comandar(int *fd, FILE *entrada) {
 
 int main(int argc, char** argv) {
     //o fd será o file descriptor do pipe
-    int fd[2];
+    int fd[2];        
     //cria o pipe que será responsável por comunicar com o process manager
     if (criaPipe(fd) == -1) {
         printf("Ocorreu um erro ao criar o pipe.\n");

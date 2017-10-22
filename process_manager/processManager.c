@@ -75,6 +75,10 @@ int main(int argc, char** argv) {
     //o process manager deve ficar ouvindo o commander e efetuar as ações caso receba o comando
     char *comando = (char*) malloc(sizeof (char));
 
+    int *saidaPadrao;
+    fscanf(stdin, "%d", &saidaPadrao);
+    fprintf(saidaPadrao,"Teste no stdin");
+    
     //Inicialização das listas dos processos
     TabelaPcb tabelaPcb;
     tabelaPcb.num = 0;
@@ -204,8 +208,9 @@ void executa(TabelaPcb *tabelaPcb, EstadoExecutando *estadoExecutando, EstadoPro
     Processo *executante = &tabelaPcb->processos[estadoExecutando->ids[0]];
     char instrucao, *file, *path = "../input/";
     int soma = 0, n;
+    int quantidade;
     instrucao = executante->programa[executante->PC];
-    printf("3 - Contador de programa: %c\n",executante->programa[executante->PC]);
+    printf("3 - Contador de programa: %d\n",executante->PC);
     switch (instrucao) {
         case 'S':
             //atualiza valor da variavel do processo
@@ -313,9 +318,25 @@ void executa(TabelaPcb *tabelaPcb, EstadoExecutando *estadoExecutando, EstadoPro
 
             break;
         case 'R':
-            sscanf(&executante->programa[executante->PC], "R %s", file);
-            path = realloc(path, (strlen(file) + strlen("../input/")) * sizeof(char));
-            strcat(path, file);
+            //contar quantos caracteres tem até o termino do nome do arquivo
+            quantidade = 2;
+            for (; (executante->programa[executante->PC+quantidade] != '\n') && (executante->programa[executante->PC+quantidade] != '\0') ? 1 : (0); quantidade++);
+            quantidade -= 2;
+            //printf("%d\n",quantidade);
+            file = (char*) malloc(sizeof(char)*(quantidade+1));
+            sscanf(&executante->programa[executante->PC], "R %s", file);            
+            //printf("%d\n",quantidade);
+            //printf("%s\n",file);
+            path = (char*) malloc(sizeof(char) * (quantidade+9));
+            //printf("passou aqui\n");
+            memcpy(path,"./input/",sizeof(char)*8);
+            //printf("passou aqui\n");
+            for(int i=0;i<quantidade;i++){
+                //printf("Vai copiar na posicao %d\n",i);
+                path[8+i] = file[i];
+            }
+            //strcat(path, file);
+            //printf("passou aqui\n");
             executante->programa = getPrograma(fopen(path, "r"));
             executante->PC = 0;
             free(path);
