@@ -38,7 +38,7 @@ void comandar(int *fd, FILE *entrada) {
     
     
     //o primeiro passo aqui vai ser enviar o stdout para o proccess manager para que ele consiga imprimir as coisas na saída padrão
-    write(fd[1],&stdout  ,sizeof(int));
+    
 
     
     char *comando = (char*) malloc(sizeof (char)*2);

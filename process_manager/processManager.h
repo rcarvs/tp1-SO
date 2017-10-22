@@ -65,6 +65,11 @@ typedef struct EstadoExecutando{
 	int num;
 } EstadoExecutando;
 
+typedef struct Finalizados{
+    Processo *processos;
+    int num;
+} Finalizados;
+
 typedef struct CPU{
     int contador;
     int valor;

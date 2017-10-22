@@ -71,13 +71,13 @@ void printTabela(TabelaPcb *tabelaPcb, int *ids, int size, char *nomeEstado) {
     }
 }
 
+Finalizados finalizados;
+
 int main(int argc, char** argv) {
     //o process manager deve ficar ouvindo o commander e efetuar as ações caso receba o comando
     char *comando = (char*) malloc(sizeof (char));
 
-    int *saidaPadrao;
-    fscanf(stdin, "%d", &saidaPadrao);
-    fprintf(saidaPadrao,"Teste no stdin");
+    
     
     //Inicialização das listas dos processos
     TabelaPcb tabelaPcb;
@@ -282,9 +282,16 @@ void executa(TabelaPcb *tabelaPcb, EstadoExecutando *estadoExecutando, EstadoPro
             estadoExecutando->num--;
 
             //Agora preciso colocar ele numa lista de processos finalizados pra poder tirar a média
-
-
-
+            if(finalizados.num == 0){                
+                finalizados.num++;
+                finalizados.processos = (Processo*) malloc(sizeof(Processo)*finalizados.num);                
+                
+            }else{
+                finalizados.num++;
+                realloc(finalizados.processos,finalizados.num);
+                finalizados.processos[finalizados.num-1] = *executante;
+            }
+            
             if (debug) {
                 printf("\n### Reconheceu um E ###\n");
             }
